@@ -267,6 +267,7 @@ static void touches_update(struct MTState* ms,
 							
 						// if no then invalidate the bottom one.
 						//if (GETBIT(ms->touch[n].state, MT_NEW))
+							if (sqrt((ms->touch[prior_bottom_touch].y - ms->touch[n].y)^2 + (ms->touch[prior_bottom_touch].x - ms->touch[n].x) ^ 2) > .1 * cfg->pad_height)
 							SETBIT(ms->touch[prior_bottom_touch].state, MT_BOTTOM_EDGE);
 						
 					}
@@ -274,6 +275,7 @@ static void touches_update(struct MTState* ms,
 				} else {
 						if (prior_non_bottom_touch > 0 && ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
 						//	if (GETBIT(ms->touch[n].state, MT_NEW))
+							if (sqrt((ms->touch[prior_bottom_touch].y - ms->touch[n].y)^2 + (ms->touch[prior_bottom_touch].x - ms->touch[n].x) ^ 2) > .1 * cfg->pad_height)
 								SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
 						} else {
 						//	CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
