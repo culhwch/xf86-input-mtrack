@@ -206,7 +206,7 @@ static void touches_update(struct MTState* ms,
 			const struct HWState* hs,
 			const struct Capabilities* caps)
 {
-	int i, n, disable = 0;
+	int i, n, j, k, disable = 0;
 	// Release missing touches.
 	foreach_bit(i, ms->touch_used) {
 		if (find_finger(hs, ms->touch[i].tracking_id) == -1)
@@ -215,6 +215,7 @@ static void touches_update(struct MTState* ms,
 
 	// Add and update touches.
 	foreach_bit(i, hs->used) {
+		//int touchcount =  bitcount(hs->used); 
 		n = find_touch(ms, hs->data[i].tracking_id);
 		if (n >= 0) {
 			if (is_release(cfg, &hs->data[i]))
@@ -237,13 +238,79 @@ static void touches_update(struct MTState* ms,
 			else
 				CLEARBIT(ms->touch[n].state, MT_PALM);
 			
-			if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100) {
-				if (GETBIT(ms->touch[n].state, MT_NEW))
-					SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
-			}
-			else
-				CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+
 			
+				int prior_bottom_touch = 0;
+				int prior_non_bottom_touch = 0;
+				foreach_bit(j, hs->used){
+					k = find_touch(ms, hs->data[j].tracking_id);
+					
+					if (k >= 0 && ms->touch[k].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
+					 if (k != n ) {
+						prior_bottom_touch = k;
+					//	break;
+					 }
+					} else if (k >= 0 && k != n) {
+						prior_non_bottom_touch = k;
+					}
+				}
+				//check to see if there was a prior bottom edge -- via coordiates
+				if (prior_bottom_touch > 0) {
+				//if yes then check to see if the current one is also a bottom -- via coordinates
+					if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 && GETBIT(ms->touch[n].state, MT_NEW) ) { 
+						//if yes then make the prior one valid, just in case it wasn't already leave the current one alone
+						CLEARBIT(ms->touch[prior_bottom_touch].state, MT_BOTTOM_EDGE);
+						CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+						SETBIT(ms->touch[prior_bottom_touch].state, MT_NEW);
+						SETBIT(ms->touch[n].state, MT_NEW);
+					} else { 
+							
+						// if no then invalidate the bottom one.
+						//if (GETBIT(ms->touch[n].state, MT_NEW))
+							SETBIT(ms->touch[prior_bottom_touch].state, MT_BOTTOM_EDGE);
+						
+					}
+				
+				} else {
+						if (prior_non_bottom_touch > 0 && ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
+						//	if (GETBIT(ms->touch[n].state, MT_NEW))
+								SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+						} else {
+						//	CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+						//	SETBIT(ms->touch[n].state, MT_NEW);
+						}
+				// n = 0 either pass one... or no other touches present -- do nothing.
+				}
+			
+
+			//if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 )  {
+			//	if (GETBIT(ms->touch[n].state, MT_NEW))
+			//		SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+		/*		if (touchcount <= 1) {
+				 	CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+				}
+				if (touchcount > 1) {
+					for (j = touchcount; j > 0; j--) {
+						k =  find_touch(ms, hs->data[j].tracking_id);
+						if (GETBIT(ms->touch[k].state, MT_BOTTOM_EDGE)) {
+						  	SETBIT(ms->touch[n].state, MT_NEW);
+							SETBIT(ms->touch[k].state, MT_NEW);
+						} else if (ms->touch[k].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 )  {
+							SETBIT(ms->touch[k].state, MT_NEW);
+							SETBIT(ms->touch[n].state, MT_NEW);
+						}
+					}
+				} */
+			//} else 
+			//	CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+		}
+	}
+
+     foreach_bit(i, hs->used) {
+//                int touchcount =  bitcount(hs->used);
+                n = find_touch(ms, hs->data[i].tracking_id);
+		if (n >= 0) {
+	
 			MODBIT(ms->touch[n].state, MT_INVALID,
 				GETBIT(ms->touch[n].state, MT_THUMB) && cfg->ignore_thumb ||
 				GETBIT(ms->touch[n].state, MT_PALM) && cfg->ignore_palm ||
