@@ -193,15 +193,15 @@ static void buttons_update(struct Gestures* gs,
 	button_prev = hs->button;
 
 	if (down) {
-		int invalid, earliest, latest, moving = 0;
+		int invalid, earliest, latest, moving = 0; // I think we should keep a count of how many touches are invalid
 		gs->move_type = GS_NONE;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		earliest = -1;
 		latest = -1;
 		invalid = 0;
 		foreach_bit(i, ms->touch_used) {
-			if (GETBIT(ms->touch[i].state, MT_INVALID)){// ||  ms->touch[i].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
-				invalid++;
+			if (GETBIT(ms->touch[i].state, MT_INVALID)){
+				invalid++; //keep track of the number of these for later
 				continue;
 			}
 			if (cfg->button_integrated && !GETBIT(ms->touch[i].flags, GS_BUTTON))
@@ -210,10 +210,6 @@ static void buttons_update(struct Gestures* gs,
 				earliest = i;
 			if (latest == -1 || timercmp(&ms->touch[i].down, &ms->touch[latest].down, >)) 
 				latest = i;
-			if (invalid > 0) {
-				//earliest -= invalid;
-				//latest -= invalid;
-			}
 		}
 
 		if (emulate) {
@@ -266,10 +262,10 @@ static void buttons_update(struct Gestures* gs,
 					timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
 					if (cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) {
 					
-					//if (!GETBIT(ms->touch[i].state, MT_INVALID))
 						touching++;
 					}
 				}
+				//remove the total number of invalid touches
 				touching = touching - invalid;
 				if (cfg->button_integrated)
 					touching--;

@@ -239,77 +239,58 @@ static void touches_update(struct MTState* ms,
 				CLEARBIT(ms->touch[n].state, MT_PALM);
 			
 
-			
-				int prior_bottom_touch = 0;
-				int prior_non_bottom_touch = 0;
-				foreach_bit(j, hs->used){
-					k = find_touch(ms, hs->data[j].tracking_id);
-					
-					if (k >= 0 && ms->touch[k].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
+			// In order to invalidate bottom touches, I also need to know if there are other valid or invalid touches happening.
+			// I save their int in the two variables bellow.	
+			int prior_bottom_touch = 0;
+			int prior_non_bottom_touch = 0;
+			foreach_bit(j, hs->used){
+				k = find_touch(ms, hs->data[j].tracking_id);
+				//we are checking coordinates, since we don't know if it has been marked by a prior iteration of the loop or not
+				if (k >= 0 && ms->touch[k].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
 					 if (k != n ) {
 						prior_bottom_touch = k;
-					//	break;
 					 }
 					} else if (k >= 0 && k != n) {
 						prior_non_bottom_touch = k;
 					}
 				}
-				//check to see if there was a prior bottom edge -- via coordiates
+				// If there was a touch in the bottom part already on the system...
 				if (prior_bottom_touch > 0) {
-				//if yes then check to see if the current one is also a bottom -- via coordinates
+					// if yes then check to see if the current one is also a bottom -- via coordinates
 					if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 && GETBIT(ms->touch[n].state, MT_NEW) ) { 
-						//if yes then make the prior one valid, just in case it wasn't already leave the current one alone
+						//if yes then make the prior one valid, since it may have been invalidated... make both touches new.
+						// this is probably a scrolling gesture
 						CLEARBIT(ms->touch[prior_bottom_touch].state, MT_BOTTOM_EDGE);
 						CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
 						SETBIT(ms->touch[prior_bottom_touch].state, MT_NEW);
 						SETBIT(ms->touch[n].state, MT_NEW);
 					} else { 
 							
-						// if no then invalidate the bottom one.
-						//if (GETBIT(ms->touch[n].state, MT_NEW))
+						// if no then and the touches were far enough apart to make sure it wasn't a scroll 
+						// motion that happened to straddle the line then we need to invalidate the bottom touch now
+						// note that the bottom touch may have been valid prior to finding a new top side touch.
 							if (sqrt((ms->touch[prior_bottom_touch].y - ms->touch[n].y)^2 + (ms->touch[prior_bottom_touch].x - ms->touch[n].x) ^ 2) > .1 * (cfg->pad_height/10000))
 							SETBIT(ms->touch[prior_bottom_touch].state, MT_BOTTOM_EDGE);
 						
 					}
 				
 				} else {
-						if (prior_non_bottom_touch > 0 && ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
-						//	if (GETBIT(ms->touch[n].state, MT_NEW))
+					//In this case we may have a not have a prior bottom touch, 
+					//but we might have a prior top touch and a current bottom touch.
+					if (prior_non_bottom_touch > 0 && ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 ) {
+						// We do have a current bottom touch and an old top touch... we make sure they are not close 
+						// enough to just be a scroll
 							if (sqrt((ms->touch[prior_non_bottom_touch].y - ms->touch[n].y)^2 + (ms->touch[prior_non_bottom_touch].x - ms->touch[n].x) ^ 2) > .1 * (cfg->pad_height/10000))
 								SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
 						} else {
-						//	CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
-						//	SETBIT(ms->touch[n].state, MT_NEW);
+						// nothing to see here... please move along.
 						}
 				// n = 0 either pass one... or no other touches present -- do nothing.
 				}
-			
-
-			//if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 )  {
-			//	if (GETBIT(ms->touch[n].state, MT_NEW))
-			//		SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
-		/*		if (touchcount <= 1) {
-				 	CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
-				}
-				if (touchcount > 1) {
-					for (j = touchcount; j > 0; j--) {
-						k =  find_touch(ms, hs->data[j].tracking_id);
-						if (GETBIT(ms->touch[k].state, MT_BOTTOM_EDGE)) {
-						  	SETBIT(ms->touch[n].state, MT_NEW);
-							SETBIT(ms->touch[k].state, MT_NEW);
-						} else if (ms->touch[k].y > (100 - cfg->bottom_edge)*cfg->pad_height/100 * 0.6 )  {
-							SETBIT(ms->touch[k].state, MT_NEW);
-							SETBIT(ms->touch[n].state, MT_NEW);
-						}
-					}
-				} */
-			//} else 
-			//	CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
 		}
 	}
-
-     foreach_bit(i, hs->used) {
-//                int touchcount =  bitcount(hs->used);
+	// I decided to break this off as a separate loop, so as not to invalidate touches before they had all be scanne through.
+     	foreach_bit(i, hs->used) {
                 n = find_touch(ms, hs->data[i].tracking_id);
 		if (n >= 0) {
 	
