@@ -5,6 +5,13 @@ An Xorg driver for multitouch trackpads. Supports any trackpad whose kernel
 driver uses the slotted multitouch protocol. For more information on the
 protocol see the [kernel documentation][1].
 
+This is a fork of BlueDragon's verion of the driver. Instead of treating the
+bottom edge as a dead area, this verion basically ignores touch input in the bottom 40
+percent of the trackpad when there is another touch on the upper bit. This makes the
+trackpad much more usable for Cuppertino made notebooks. Hopefully, with only 
+a little more tweaking I can get it to run and feel like the mouse does in other
+operating systems. Give it a try, and let me know.
+
 This driver is compatible with Xorg server versions 1.7 to 1.12. It requires
 the [mtdev][4] library to operate.
 
@@ -20,16 +27,21 @@ This software is licensed under the [GPLv2][2] and is a fork of the
 Binaries
 --------
 
-* [Gentoo][5]
-* [Ubuntu][6]
-* [Arch][7]
+I'll try to put some binary packages up soon. I'll need to check through a few dependencies
+to make sure it will run on a base ubuntu system. Expect packages soon.
 
-Arch package contributed and maintained by Mike Zackles.
+Compiling
+---------
+
+You will need to do an 'autoconf -i' to get everything going. Then run the generated 'configure' script. You may
+want to set the prefix to '/usr' (configure --prefix=/usr) Then run make and make install (as root). Then add a file to
+your /usr/share/X11/xorg.conf.d directory. If you alread have the synaptics driver, then you will need to make sure
+the file for mtrack starts with a higher two didget number.
 
 Configuration
 -------------
 
-The following is a minimal working InputClass section for xorg.conf:
+The following is a minimal working InputClass section for xorg.conf - or for ubuntu /usr/share/X11/xorg.conf.d/52-mtrack.conf:
 
     Section "InputClass"
         MatchIsTouchpad "on"
