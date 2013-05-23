@@ -7,6 +7,9 @@ SOURCES_COMMON = \
 	$(srcdir)/src/mtstate.c \
 	$(srcdir)/src/trig.c
 
+install-data-local:
+	$(install_sh) $(srcdir)/52-mtrack.conf $(prefix)/share/X11/xorg.conf.d
+
 @DRIVER_NAME@_drv_la_LTLIBRARIES = @DRIVER_NAME@_drv.la
 @DRIVER_NAME@_drv_la_LDFLAGS = -module -avoid-version
 @DRIVER_NAME@_drv_la_SOURCES = $(SOURCES_COMMON) \
