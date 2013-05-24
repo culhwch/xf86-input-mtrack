@@ -59,8 +59,10 @@ the <a href="http://bitmath.org/code/mtdev/" title="mtdev library website">mtdev
 
 <h2>Binaries</h2>
 
-<p>I'll try to put some binary packages up soon. I'll need to check through a few dependencies
-to make sure it will run on a base ubuntu system. Expect packages soon.</p>
+<p><a href="https://github.com/culhwch/xf86-input-mtrack/blob/master/xserver-xorg-input-mtrack-culhwch_0.0.1-0.0.1_amd64.deb" title="Ubuntu build">Ubuntu Raring</a> Use this binary on amd64 Ubuntu Raring systems. (dpkg -i FILENANE) should get you started.
+Note that you may need to adjust the configuration file in /usr/share/X11/xorg.conf.d/52-mtrack.conf It is 
+currently setup to only work on apple builtin trackpads. If you want to try it on different hardware just edit
+out the line 'MatchProduct "Apple|bcm5974"'. Please let me know your milleage with this driver.</p>
 
 <h2>Compiling</h2>
 
@@ -82,6 +84,8 @@ EndSection
 
 <p>Configuration options may be defined inside the InputClass section to configure
 the driver. Available options and their defaults are as follows.</p>
+
+<p>---Note that some of these settings might not be available.</p>
 
 <p><strong>TrackpadDisable</strong> -
 Disables trackpad touch input. A value of 0 will enable the trackpad. A value
