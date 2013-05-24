@@ -27,8 +27,12 @@ This software is licensed under the [GPLv2][2] and is a fork of the
 Binaries
 --------
 
-I'll try to put some binary packages up soon. I'll need to check through a few dependencies
-to make sure it will run on a base ubuntu system. Expect packages soon.
+[Ubuntu Raring][5] Use this binary on amd64 Ubuntu Raring systems. (dpkg -i FILENANE) should get you started.
+Note that you may need to adjust the configuration file in /usr/share/X11/xorg.conf.d/52-mtrack.conf It is 
+currently setup to only work on apple builtin trackpads. If you want to try it on different hardware just edit
+out the line 'MatchProduct "Apple|bcm5974"'. Please let me know your milleage with this driver.
+
+
 
 Compiling
 ---------
@@ -51,6 +55,8 @@ The following is a minimal working InputClass section for xorg.conf - or for ubu
 
 Configuration options may be defined inside the InputClass section to configure
 the driver. Available options and their defaults are as follows.
+
+---Note that some of these settings might not be available.
 
 **TrackpadDisable** -
 Disables trackpad touch input. A value of 0 will enable the trackpad. A value
@@ -299,7 +305,7 @@ Whether or not to invert the Y axis. Boolean value. Defaults to false.
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
 [3]: http://bitmath.org/code/multitouch/                                        "xf86-input-multitouch website"
 [4]: http://bitmath.org/code/mtdev/                                             "mtdev library website"
-[5]: http://www.dev.fatalmachine.org/xf86-input-mtrack/gentoo                   "Gentoo Ebuilds"
+[5]: https://github.com/culhwch/xf86-input-mtrack/blob/master/xserver-xorg-input-mtrack-culhwch_0.0.1-0.0.1_amd64.deb                   "Ubuntu build"
 [6]: http://www.dev.fatalmachine.org/xf86-input-mtrack/ubuntu                   "Ubuntu Packages"
 [7]: http://aur.archlinux.org/packages.php?ID=48505                             "Arch Package"
 
