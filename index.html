@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Xf86-input-mtrack by culhwch</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Xf86-input-mtrack</h1>
+          <h2>Xorg Multitouch Trackpad Driver</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/culhwch/xf86-input-mtrack/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/culhwch/xf86-input-mtrack/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/culhwch/xf86-input-mtrack" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>xf86-input-mtrack</h1>
+
+<p>An Xorg driver for multitouch trackpads. Supports any trackpad whose kernel
+driver uses the slotted multitouch protocol. For more information on the
+protocol see the <a href="http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt" title="Kernel Multitouch Protocol">kernel documentation</a>.</p>
+
+<p>This is a fork of BlueDragon's verion of the driver. Instead of treating the
+bottom edge as a dead area, this verion basically ignores touch input in the bottom 40
+percent of the trackpad when there is another touch on the upper bit. This makes the
+trackpad much more usable for Cuppertino made notebooks. Hopefully, with only 
+a little more tweaking I can get it to run and feel like the mouse does in other
+operating systems. Give it a try, and let me know.</p>
+
+<p>This driver is compatible with Xorg server versions 1.7 to 1.12. It requires
+the <a href="http://bitmath.org/code/mtdev/" title="mtdev library website">mtdev</a> library to operate.</p>
+
+<h2>License</h2>
+
+<ul>
+<li>Copyright (C) 2011 Ryan Bourgeois <a href="mailto:bluedragonx@gmail.com">bluedragonx@gmail.com</a>
+</li>
+<li>Copyright (C) 2008 Henrik Rydberg <a href="mailto:rydberg@euromail.se">rydberg@euromail.se</a>
+</li>
+</ul><p>This software is licensed under the <a href="http://www.gnu.org/licenses/gpl-2.0.html" title="GNU General Public License, version 2">GPLv2</a> and is a fork of the
+<a href="http://bitmath.org/code/multitouch/" title="xf86-input-multitouch website">xf86-input-multitouch</a> driver by Henrik Rydberg.</p>
+
+<h2>Binaries</h2>
+
+<p>I'll try to put some binary packages up soon. I'll need to check through a few dependencies
+to make sure it will run on a base ubuntu system. Expect packages soon.</p>
+
+<h2>Compiling</h2>
+
+<p>You will need to do an 'autoconf -i' to get everything going. Then run the generated 'configure' script. You may
+want to set the prefix to '/usr' (configure --prefix=/usr) Then run make and make install (as root). Then add a file to
+your /usr/share/X11/xorg.conf.d directory. If you alread have the synaptics driver, then you will need to make sure
+the file for mtrack starts with a higher two didget number.</p>
+
+<h2>Configuration</h2>
+
+<p>The following is a minimal working InputClass section for xorg.conf - or for ubuntu /usr/share/X11/xorg.conf.d/52-mtrack.conf:</p>
+
+<pre><code>Section "InputClass"
+    MatchIsTouchpad "on"
+    Identifier      "Touchpads"
+    Driver          "mtrack"
+EndSection
+</code></pre>
+
+<p>Configuration options may be defined inside the InputClass section to configure
+the driver. Available options and their defaults are as follows.</p>
+
+<p><strong>TrackpadDisable</strong> -
+Disables trackpad touch input. A value of 0 will enable the trackpad. A value
+of 1 will disable tapping and gestures but not movement. A value of 2 will
+disable all input. A value of 3 will also disable physical buttons. Integer.
+Default is 0.</p>
+
+<p><strong>Sensitivity</strong> - 
+Adjusts the sensitivity (movement speed) of the touchpad. This is a real number
+greater than or equal to zero. Default is 1. A value of 0 will disable pointer
+movement.</p>
+
+<p><strong>FingerHigh</strong> - 
+Defines the pressure at which a finger is detected as a touch. This is a
+percentage represented as an integer. Default is 5.</p>
+
+<p><strong>FingerLow</strong> - 
+Defines the pressure at which a finger is detected as a release. This is a
+percentage represented as an integer. Default is 5.</p>
+
+<p><strong>IgnoreThumb</strong> - 
+Whether or not to ignore touches that are determined to be thumbs. Boolean
+value. Defaults to false.</p>
+
+<p><strong>IgnorePalm</strong> - 
+Whether or not to ignore touches that are determined to be palms. Boolean
+value. Defaults to false.</p>
+
+<p><strong>DisableOnThumb</strong> - 
+Whether or not to disable the entire trackpad when a thumb is touching. Boolean
+value. Defaults to false.</p>
+
+<p><strong>DisableOnPalm</strong> - 
+Whether or not to disable the entire trackpad when a palm is touching. Boolean
+value. Defaults to false.</p>
+
+<p><strong>ThumbRatio</strong> - 
+The width/length ratio of what's considered a thumb. It is expected that a
+thumb is longer than it is wide. This tells the driver how much longer.
+Percentage represented by an integer. Defaults to 70.</p>
+
+<p><strong>ThumbSize</strong> - 
+The minimum size of what's considered a thumb. It is expected that a thumb
+will be larger than other fingers. This is represented as a percentage of the
+maximum touch value and is dependent on the trackpad hardware. Integer value.
+Defaults to 25.</p>
+
+<p><strong>PalmSize</strong> - 
+The minimum size of what's considered a palm. Palms are expected to be very
+large on the trackpad. This is represented as a percentage of the maximum touch
+value and is dependent on the trackpad hardware. Integer value. Defaults to 40.</p>
+
+<p><strong>BottomEdge</strong> -
+The size of an area at the bottom of the trackpad where new touches are ignored
+(fingers traveling into this area from above will still be tracked). This is
+represented as a percentage of the total trackpad height. Defaults to 10.</p>
+
+<p><strong>ButtonEnable</strong> - 
+Whether or not to enable the physical buttons on or near the trackpad. Boolean
+value. Defaults to true.</p>
+
+<p><strong>ButtonIntegrated</strong> - 
+Whether or not the physical buttons are integrated with the trackpad. If you
+have a one-piece trackpad like on newer MacBooks, this should be set to true.
+Button emulation depends on this value being correct. Boolean value. Defaults
+to true.</p>
+
+<p><strong>ButtonMoveEmulate</strong>
+Whether or not to count the moving finger when emulating button clicks. Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.</p>
+
+<p><strong>ButtonZonesEnable</strong> -
+Whether or not to enable button zones. If button zones are enabled then the
+trackpad will be split into one, two, or three vertical zones. Clicking the
+integrated button in one of these zones will send the button event for
+ClickFinger1, ClickFinger2, or ClickFinger3. The driver will only add zones for
+those ClickFinger values that are enabled. So setting ClickFinger1 to 0 and
+enabling the other two will create two zones, one for ClickFinger2 and one for
+ClickFinger3. Boolean value. Defaults to false.</p>
+
+<p><strong>ButtonTouchExpire</strong> - 
+How long (in ms) to consider a touching finger as part of button emulation. A
+value of 0 will not expire touches. Integer value. Defaults to 100.</p>
+
+<p><strong>ClickFinger1</strong> - 
+Which button to emulate when one finger is touching the trackpad during a
+click. Integer value. A value of 0 disables one-touch emulation. Defaults to 3.</p>
+
+<p><strong>ClickFinger2</strong> - 
+Which button to emulate when two fingers are touching the trackpad during a
+click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 2.</p>
+
+<p><strong>ClickFinger3</strong> - 
+Which button to emulate when three fingers are touching the trackpad during a
+click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 0.</p>
+
+<p><strong>TapButton1</strong> - 
+Which button to emulate for one-finger tapping. Integer value. A value of 0
+disables one-finger tapping. Defaults to 1.</p>
+
+<p><strong>TapButton2</strong> - 
+Which button to emulate for two-finger tapping. Integer value. A value of 0
+disables two-finger tapping. Defaults to 3.</p>
+
+<p><strong>TapButton3</strong> - 
+Which button to emulate for three-finger tapping. Integer value. A value of 0
+disables three-finger tapping. Defaults to 2.</p>
+
+<p><strong>TapButton4</strong> - 
+Which button to emulate for four-finger tapping. Integer value. A value of 0
+disables three-finger tapping. Defaults to 0.</p>
+
+<p><strong>ClickTime</strong> - 
+When tapping, how much time to hold down the emulated button. Integer value
+representing milliseconds. Defaults to 50.</p>
+
+<p><strong>MaxTapTime</strong> - 
+The amount of time to wait for a tap to release before counting it as a move.
+Integer value representing milliseconds. Defaults to 120.</p>
+
+<p><strong>MaxTapMove</strong> - 
+How far a touch is allowed to move before counting it is no longer considered a
+tap. Integer value. Defaults to 400.</p>
+
+<p><strong>GestureClickTime</strong> - 
+When a gesture triggers a click, how much time to hold down the emulated button.
+Integer value representing milliseconds. Defaults to 10.</p>
+
+<p><strong>GestureWaitTime</strong> - 
+Touches are allowed to transition from one gesture to another. For example, you
+may go from scrolling to swiping without releasing your fingers from the pad.
+This value is the amount of time you must be performing the new gesture before
+it is triggered. This prevents accidental touches from triggering other
+gestures. Integer value representing milliseconds. Defaults to 100.</p>
+
+<p><strong>ScrollDistance</strong> - 
+For two finger scrolling. How far you must move your fingers before a button
+click is triggered. Integer value. Defaults to 150.</p>
+
+<p><strong>ScrollUpButton</strong> - 
+For two finger scrolling. The button that is triggered by scrolling up. Integer
+value. A value of 0 disables scrolling up. Defaults to 4.</p>
+
+<p><strong>ScrollDownButton</strong> - 
+For two finger scrolling. The button that is triggered by scrolling down.
+Integer value. A value of 0 disables scrolling down. Defaults to 5.</p>
+
+<p><strong>ScrollLeftButton</strong> - 
+For two finger scrolling. The button that is triggered by scrolling left.
+Integer value. A value of 0 disables scrolling left. Defaults to 6.</p>
+
+<p><strong>ScrollDownButton</strong> - 
+For two finger scrolling. The button that is triggered by scrolling right.
+Integer value. A value of 0 disables scrolling right. Defaults to 7.</p>
+
+<p><strong>SwipeDistance</strong> - 
+For three finger swiping. How far you must move your fingers before a button
+click is triggered. Integer value. Defaults to 700.</p>
+
+<p><strong>SwipeUpButton</strong> - 
+For three finger swiping. The button that is triggered by swiping up. Integer
+value. A value of 0 disables swiping up. Defaults to 8.</p>
+
+<p><strong>SwipeDownButton</strong> - 
+For three finger swiping. The button that is triggered by swiping down. Integer
+value. A value of 0 disables swiping down. Defaults to 9.</p>
+
+<p><strong>SwipeLeftButton</strong> - 
+For three finger swiping. The button that is triggered by swiping left. Integer
+value. A value of 0 disables swiping left. Defaults to 10.</p>
+
+<p><strong>SwipeRightButton</strong> - 
+For three finger swiping. The button that is triggered by swiping right. Integer
+value. A value of 0 disables swiping right. Defaults to 11.</p>
+
+<p><strong>Swipe4Distance</strong> - 
+For four finger swiping. How far you must move your fingers before a button
+click is triggered. Integer value. Defaults to 700.</p>
+
+<p><strong>Swipe4UpButton</strong> - 
+For four finger swiping. The button that is triggered by swiping up. Integer
+value. A value of 0 disables swiping up. Defaults to 8.</p>
+
+<p><strong>Swipe4DownButton</strong> - 
+For four finger swiping. The button that is triggered by swiping down. Integer
+value. A value of 0 disables swiping down. Defaults to 9.</p>
+
+<p><strong>Swipe4LeftButton</strong> - 
+For four finger swiping. The button that is triggered by swiping left. Integer
+value. A value of 0 disables swiping left. Defaults to 10.</p>
+
+<p><strong>Swipe4RightButton</strong> - 
+For four finger swiping. The button that is triggered by swiping right. Integer
+value. A value of 0 disables swiping right. Defaults to 11.</p>
+
+<p><strong>ScaleDistance</strong> - 
+For pinch scaling. How far you must move your fingers before a button click is
+triggered. Integer value. Defaults to 150.</p>
+
+<p><strong>ScaleUpButton</strong> - 
+For pinch scaling. The button that is triggered by scaling up. Integer value. A
+value of 0 disables scaling up. Defaults to 12.</p>
+
+<p><strong>ScaleDownButton</strong> - 
+For pinch scaling. The button that is triggered by scaling down. Integer value.
+A value of 0 disables scaling down. Defaults to 13.</p>
+
+<p><strong>RotateDistance</strong> - 
+For two finger rotation. How far you must move your fingers before a button
+click is triggered. Integer value. Defaults to 150.</p>
+
+<p><strong>RotateLeftButton</strong> - 
+For two finger rotation. The button that is triggered by rotating left. Integer
+value. A value of 0 disables rotation left. Defaults to 14.</p>
+
+<p><strong>RotateRightButton</strong> - 
+For two finger rotation. The button that is triggered by rotating right. Integer
+value. A value of 0 disables rotation right. Defaults to 14.</p>
+
+<p><strong>TapDragEnable</strong> - 
+Whether or not to enable tap-to-drag functionality. Boolean value. Defaults to
+true.</p>
+
+<p><strong>TapDragTime</strong> - 
+The tap-to-drag timeout. This is how long the driver will wait after a single
+tap for a movement event before sending the click. Integer value representing
+milliseconds. Defaults to 350.</p>
+
+<p><strong>TapDragWait</strong>
+How long after detecting movement to trigger a button down event. During this
+time pointer movement will be disabled. Increase this value if you find you're
+draggin when you don't wish it. Integer value representing milliseconds.
+Defaults to 40.</p>
+
+<p><strong>TapDragDist</strong>
+How far the finger is allowed to move during drag wait time. If the finger
+moves farther than this distance during the wait time then dragging will be
+canceled and pointer movement will resume. Integer value. Defaults to 200.</p>
+
+<p><strong>AxisXInvert</strong>
+Whether or not to invert the X axis. Boolean value. Defaults to false.</p>
+
+<p><strong>AxisYInvert</strong>
+Whether or not to invert the Y axis. Boolean value. Defaults to false.</p>
+        </section>
+
+        <footer>
+          Xf86-input-mtrack is maintained by <a href="https://github.com/culhwch">culhwch</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
